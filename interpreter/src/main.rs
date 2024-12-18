@@ -17,11 +17,18 @@ fn read_file(file: File) -> Result<(), Box<dyn Error>> {
     // The main idea for this approach comes from:
     //  https://stackoverflow.com/questions/37079342/
 
-    const CAP: usize = 1024 * 128;
-    let mut reader = BufReader::with_capacity(CAP, file);
+    // Rustfmt has max_width 100 by default, and utf-8
+    // non-ASCII characters are > 1 byte. So we make our
+    // buffer hold ~ at least 10 lines, should be plenty.
+    const BUFFER_CAPACITY: usize = 1000 * 2;
+    let mut reader = BufReader::with_capacity(BUFFER_CAPACITY, file);
 
     loop {
         let buffer_bytes = reader.fill_buf()?;
+
+        // NOTE: The reader reads by the byte. So it could
+        // potentially split a multibyte char across reads.
+        // TODO: We need to test and handle that case.
         let buffer = str::from_utf8(buffer_bytes)?;
         let length = buffer.len();
 
