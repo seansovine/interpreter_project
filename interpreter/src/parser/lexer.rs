@@ -8,7 +8,7 @@ const BUFFER_SIZE: usize = 12;
 
 /// Wraps BufReader<File> and allows us to read a file
 /// one utf-8 character at a time, without loading the
-/// the entire file into memory at once.
+/// entire file into memory at once.
 pub struct FileUtfReader {
     reader: BufReader<File>,
 }
