@@ -9,19 +9,19 @@ const BUFFER_SIZE: usize = 12;
 /// Wraps BufReader<File> and allows us to read a file
 /// one utf-8 character at a time, without loading the
 /// entire file into memory at once.
-pub struct FileUtfReader {
+pub struct FileUtf8Reader {
     reader: BufReader<File>,
 }
 
-impl FileUtfReader {
-    pub fn new(file: File) -> FileUtfReader {
-        FileUtfReader {
+impl FileUtf8Reader {
+    pub fn new(file: File) -> FileUtf8Reader {
+        FileUtf8Reader {
             reader: BufReader::with_capacity(BUFFER_SIZE, file),
         }
     }
 }
 
-impl Iterator for FileUtfReader {
+impl Iterator for FileUtf8Reader {
     type Item = char;
 
     fn next(&mut self) -> Option<Self::Item> {

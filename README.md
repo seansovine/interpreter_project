@@ -25,8 +25,8 @@ any work we do on this.
 
 __Lazy file char iterator:__
 
-The module [`src/parser/lexer.rs`](interpreter/src/parser/lexer.rs) has a
-struct type `FileUtfReader` that implements the `Iterator` trait. It is a
+The module [`src/parser/file_utf8_reader.rs`](interpreter/src/parser/file_utf8_reader.rs) has a
+struct type `FileUtf8Reader` that implements the `Iterator` trait. It is a
 wrapper around `BufReader<File>`, and its iterator only reads enough bytes
 from the file to read the next utf-8 char. This is useful for reading utf-8
 chars from large file, potentially containing no linebreaks, without reading

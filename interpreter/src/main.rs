@@ -13,11 +13,11 @@ use std::env;
 use std::error::Error;
 use std::fs::File;
 
-use parser::FileUtfReader;
+use parser::FileUtf8Reader;
 
 fn read_file(file: File) -> Result<(), Box<dyn Error>> {
     println!("Reading file one char at a time:");
-    let reader = FileUtfReader::new(file);
+    let reader = FileUtf8Reader::new(file);
 
     for c in reader {
         println!("'{c}'");
