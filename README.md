@@ -21,6 +21,15 @@ lots of other interests. So we may never get there for all of them. But,
 hey, it's nice and motivating to have goals, and we're sure to learn from
 any work we do on this.
 
+## Progress
+
+So far we have implemented a basic version of the scanner, supporting
+single-character tokens, using the `FileUtf8Reader` described below. 
+We will start by implementing a Rust version of his parser from the book.
+But then we will make our own language with some of its own bells and 
+whistles, and for that we will modify the parser, including the scanner 
+part.
+
 ## Some code ideas
 
 __Lazy file char iterator:__

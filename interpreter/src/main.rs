@@ -14,6 +14,7 @@ use std::error::Error;
 use std::fs::File;
 
 use parser::FileUtf8Reader;
+use parser::scanner::Scanner;
 
 fn read_file(file: File) -> Result<(), Box<dyn Error>> {
     println!("Reading file one char at a time:");
@@ -36,7 +37,18 @@ fn main() -> Result<(), Box<dyn Error>> {
     let args: Vec<String> = env::args().collect();
     println!("Command line args are: {}\n", format!("{:?}", args));
 
+    // Test our FileUtf8Reader.
     let file = File::open(&args[1]).unwrap();
+    read_file(file).unwrap();
 
-    read_file(file)
+    // Test our scanner.
+    let file = File::open(&args[1]).unwrap();
+    let mut scanner = Scanner::new(file);
+
+    scanner.scan_tokens();
+    let tokens = scanner.tokens;
+
+    println!("\n Recognized tokens are: {:?}", tokens);
+
+    Ok(())
 }
