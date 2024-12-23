@@ -6,9 +6,10 @@
 ///
 use crate::parser::FileUtf8Reader;
 
+use std::collections::HashMap;
 use std::fs::File;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Token {
     // Single-char tokens.
     LeftParen,
@@ -36,13 +37,56 @@ pub enum Token {
     String(String),
     // Number containing text of literal.
     Number(String),
+    // Keywords.
+    And,
+    Class,
+    Else,
+    False,
+    For,
+    Fun,
+    If,
+    Nil,
+    Or,
+    Print,
+    Return,
+    Super,
+    This,
+    True,
+    Var,
+    While,
+    // User-defined identifier.
+    Identifier(String),
     // Special token to aid parser.
     EOF,
+}
+
+fn get_keywords_map() -> HashMap<String, Token> {
+    let mut keywords: HashMap<String, Token> = HashMap::new();
+
+    keywords.insert(String::from("and"), Token::And);
+    keywords.insert(String::from("class"), Token::Class);
+    keywords.insert(String::from("else"), Token::Else);
+    keywords.insert(String::from("false"), Token::False);
+    keywords.insert(String::from("for"), Token::For);
+    keywords.insert(String::from("fun"), Token::Fun);
+    keywords.insert(String::from("if"), Token::If);
+    keywords.insert(String::from("nil"), Token::Nil);
+    keywords.insert(String::from("or"), Token::Or);
+    keywords.insert(String::from("print"), Token::Print);
+    keywords.insert(String::from("return"), Token::Return);
+    keywords.insert(String::from("super"), Token::Super);
+    keywords.insert(String::from("this"), Token::This);
+    keywords.insert(String::from("true"), Token::True);
+    keywords.insert(String::from("var"), Token::Var);
+    keywords.insert(String::from("while"), Token::While);
+
+    keywords
 }
 
 pub struct Scanner {
     pub tokens: Vec<Token>,
 
+    keywords_map: HashMap<String, Token>,
     reader: FileUtf8Reader,
 
     current_char: Option<char>,
@@ -57,6 +101,7 @@ impl Scanner {
         let reader = FileUtf8Reader::new(file);
         let mut scanner = Scanner {
             tokens: vec![],
+            keywords_map: get_keywords_map(),
             reader,
             current_char: None,
             next_char: None,
@@ -160,6 +205,17 @@ impl Scanner {
                     }
                 }
 
+                // Either a user-defined identifier or a reserved word.
+                c if (c.is_ascii_alphabetic() || c == '_') => {
+                    let identifier_string = self.get_identifier();
+                    // Check if it's reserved; add appropriate token.
+                    if self.keywords_map.contains_key(&identifier_string) {
+                        self.add_token(self.keywords_map[&identifier_string].clone());
+                    } else {
+                        self.add_token(Token::Identifier(identifier_string));
+                    }
+                }
+
                 // We just ignore whitespace.
                 ' ' | '\t' | '\r' => {}
 
@@ -199,6 +255,7 @@ impl Scanner {
         }
     }
 
+    // We've seen a quote so try to read a string literal.
     fn get_string_literal(&mut self) -> Option<String> {
         // We are still on the starting '"'.
         self.advance();
@@ -266,6 +323,9 @@ impl Scanner {
 
         match self.next_char {
             Some(c) => {
+                // TODO: This could be a problem, because it's valid for
+                // a comma, parenthesis, etc. to follow a literal. So we
+                // will keep this in mind and update after testing.
                 if c.is_ascii_whitespace() {
                     Some(string)
                 } else {
@@ -276,5 +336,24 @@ impl Scanner {
 
             None => Some(string),
         }
+    }
+
+    fn get_identifier(&mut self) -> String {
+        let mut string = String::new();
+
+        string.push(self.current_char.unwrap());
+        while self.next_char.is_some() && Self::is_identifier_char(&self.next_char.unwrap()) {
+            self.advance();
+            string.push(self.current_char.unwrap());
+        }
+        // current_char is now last seen identifier char.
+
+        string
+    }
+
+    // Recognizes chars valid for characters after the
+    // first in a user identifier or reserved word.
+    fn is_identifier_char(c: &char) -> bool {
+        c.is_ascii_alphabetic() || *c == '_'
     }
 }

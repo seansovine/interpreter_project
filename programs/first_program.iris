@@ -3,7 +3,7 @@
 // about this language-in-progress.
     // There is a tab in this line!
 
-a = "Hello, " + "World!"
+var a = "Hello, " + "World!"
 3.14156
 
 42..0
