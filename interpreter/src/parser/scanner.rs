@@ -21,6 +21,17 @@ pub enum Token {
     Plus,
     Semicolon,
     Star,
+    // Operators, potentially two-token.
+    Bang,
+    BangEqual,
+    Equal,
+    EqualEqual,
+    Less,
+    LessEqual,
+    Greater,
+    GreaterEqual,
+    // Division operator
+    Slash,
     // Special token to aid parser.
     EOF,
 }
@@ -76,6 +87,45 @@ impl Scanner {
                 ';' => self.add_token(Token::Semicolon),
                 '*' => self.add_token(Token::Star),
 
+                // Operators requiring one lookahead.
+                '!' => {
+                    if self.next_char == Some('=') {
+                        self.add_token(Token::BangEqual);
+                    } else {
+                        self.add_token(Token::Bang);
+                    }
+                }
+                '=' => {
+                    if self.next_char == Some('=') {
+                        self.add_token(Token::EqualEqual);
+                    } else {
+                        self.add_token(Token::Equal);
+                    }
+                }
+                '<' => {
+                    if self.next_char == Some('=') {
+                        self.add_token(Token::LessEqual);
+                    } else {
+                        self.add_token(Token::Less);
+                    }
+                }
+                '>' => {
+                    if self.next_char == Some('=') {
+                        self.add_token(Token::GreaterEqual);
+                    } else {
+                        self.add_token(Token::Greater);
+                    }
+                }
+
+                // Either start of comment or division operator.
+                '/' => {
+                    if self.next_char == Some('\\') {
+                        self.consume_rest_of_line();
+                    } else {
+                        self.add_token(Token::Slash);
+                    }
+                }
+
                 // We just ignore whitespace.
                 ' ' | '\t' => {}
                 // Later we may want to track line numbers.
@@ -104,5 +154,11 @@ impl Scanner {
 
     fn is_at_end(&self) -> bool {
         self.current_char.is_none()
+    }
+
+    fn consume_rest_of_line(&mut self) {
+        while !self.is_at_end() && self.current_char != Some('\n') {
+            self.advance();
+        }
     }
 }
