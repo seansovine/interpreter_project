@@ -253,6 +253,10 @@ impl Scanner {
         self.current_char.is_none()
     }
 
+    fn has_next(&self) -> bool {
+        self.next_char.is_some()
+    }
+
     fn consume_rest_of_line(&mut self) {
         while !self.is_at_end() && self.current_char != Some('\n') {
             self.advance();
@@ -291,6 +295,7 @@ impl Scanner {
     fn get_numeric_literal(&mut self) -> Option<String> {
         let mut string = String::new();
 
+        // Get consecutive digits.
         string.push(self.current_char.unwrap());
         while let Some(c) = self.next_char {
             if !c.is_digit(10) {
@@ -304,8 +309,8 @@ impl Scanner {
         let is_valid_terminator =
             |c: char| -> bool { c.is_ascii_whitespace() || c == ',' || c == ')' || c == ';' };
 
-        // If not at end, current char is Some(c).
-        if self.is_at_end() || is_valid_terminator(self.next_char.unwrap()) {
+        // Check if this is an integral literal.
+        if !self.has_next() || is_valid_terminator(self.next_char.unwrap()) {
             return Some(string);
         }
 
@@ -318,14 +323,19 @@ impl Scanner {
         }
 
         // At least one digit must follow the '.'.
-        if self.is_at_end() || !self.next_char.unwrap().is_digit(10) {
+        if !self.has_next() || !self.next_char.unwrap().is_digit(10) {
             // TODO: Consider eating chars until next valid terminator.
             return None;
         }
 
-        while self.next_char.is_some() && self.next_char.unwrap().is_digit(10) {
+        // Get consecutive digits.
+        while let Some(c) = self.next_char {
+            if !c.is_digit(10) {
+                break;
+            }
+
+            string.push(c);
             self.advance();
-            string.push(self.current_char.unwrap());
         }
         // NOTE: We are now on the last recognized digit.
 
