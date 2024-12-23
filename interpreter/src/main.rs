@@ -36,8 +36,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let args: Vec<String> = env::args().collect();
     println!("Command line args are: {}\n", format!("{:?}", args));
 
-    const TEST_FILE_READER: bool = false;
-    if TEST_FILE_READER {
+    if cfg!(test_filereader) {
         // Test our FileUtf8Reader.
         let file = File::open(&args[1]).unwrap();
         read_file(file).unwrap();
