@@ -1,4 +1,6 @@
-# This is a comment.
-# We have a lot of decision to make
-# about this language-in-progress.
-# 	There is a tab in this line!
+// This is a comment.
+// We have a lot of decision to make
+// about this language-in-progress.
+    // There is a tab in this line!
+
+a = "Hello, " + "World!"

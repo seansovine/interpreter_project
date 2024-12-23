@@ -32,6 +32,8 @@ pub enum Token {
     GreaterEqual,
     // Division operator
     Slash,
+    // String containing text value.
+    String(String),
     // Special token to aid parser.
     EOF,
 }
@@ -44,17 +46,20 @@ pub struct Scanner {
     current_char: Option<char>,
     next_char: Option<char>,
     third_char: Option<char>,
+
+    current_line: usize,
 }
 
 impl Scanner {
     pub fn new(file: File) -> Scanner {
         let reader = FileUtf8Reader::new(file);
         let mut scanner = Scanner {
-            reader,
             tokens: vec![],
+            reader,
             current_char: None,
             next_char: None,
             third_char: None,
+            current_line: 1,
         };
 
         scanner.current_char = scanner.reader.next();
@@ -119,17 +124,28 @@ impl Scanner {
 
                 // Either start of comment or division operator.
                 '/' => {
-                    if self.next_char == Some('\\') {
+                    if self.next_char == Some('/') {
                         self.consume_rest_of_line();
                     } else {
                         self.add_token(Token::Slash);
                     }
                 }
 
+                // String literal.
+                '"' => {
+                    if let Some(text) = self.get_string_literal() {
+                        self.add_token(Token::String(text));
+                    } else {
+                        // TODO: Report unterminated string literal.
+                    }
+                }
+
                 // We just ignore whitespace.
-                ' ' | '\t' => {}
+                ' ' | '\t' | '\r' => {}
                 // Later we may want to track line numbers.
-                '\n' => {}
+                '\n' => {
+                    self.current_line += 1;
+                }
 
                 _ => {
                     // TODO: Handle unrecognized tokens.
@@ -160,5 +176,24 @@ impl Scanner {
         while !self.is_at_end() && self.current_char != Some('\n') {
             self.advance();
         }
+    }
+
+    fn get_string_literal(&mut self) -> Option<String> {
+        // We are still on the starting '"'.
+        self.advance();
+
+        let mut string = String::new();
+        while self.current_char != Some('"') && !self.is_at_end() {
+            string.push(self.current_char.unwrap());
+            self.advance();
+        }
+
+        if self.current_char == Some('"') {
+            Some(string)
+        } else {
+            None
+        }
+
+        // NOTE: We are still on the last quote now.
     }
 }
