@@ -182,11 +182,15 @@ impl Scanner {
 
                 // String literal.
                 '"' => {
+                    let starting_line_number = self.current_line;
                     if let Some(text) = self.get_string_literal() {
                         self.add_token(Token::String(text));
                     } else {
                         // TODO: Properly handle unterminated string literal.
-                        println!("Encountered unterminated string literal.");
+                        println!(
+                            "Encountered unterminated string literal starting on line {}.",
+                            starting_line_number
+                        );
                     }
                 }
 
@@ -286,7 +290,9 @@ impl Scanner {
     // This means we have to handle more validation of the literal format.
     fn get_numeric_literal(&mut self) -> Option<String> {
         let mut string = String::new();
-        while let Some(c) = self.current_char {
+
+        string.push(self.current_char.unwrap());
+        while let Some(c) = self.next_char {
             if !c.is_digit(10) {
                 break;
             }
@@ -295,13 +301,16 @@ impl Scanner {
             self.advance();
         }
 
+        let is_valid_terminator =
+            |c: char| -> bool { c.is_ascii_whitespace() || c == ',' || c == ')' || c == ';' };
+
         // If not at end, current char is Some(c).
-        if self.is_at_end() || self.current_char.unwrap().is_ascii_whitespace() {
+        if self.is_at_end() || is_valid_terminator(self.next_char.unwrap()) {
             return Some(string);
         }
 
         // To be valid number, next char must be '.'.
-        if self.current_char == Some('.') {
+        if self.next_char == Some('.') {
             string.push('.');
             self.advance()
         } else {
@@ -309,20 +318,16 @@ impl Scanner {
         }
 
         // At least one digit must follow the '.'.
-        if self.is_at_end() || !self.current_char.unwrap().is_digit(10) {
+        if self.is_at_end() || !self.next_char.unwrap().is_digit(10) {
             // TODO: Consider eating chars until next valid terminator.
             return None;
         }
-        string.push(self.current_char.unwrap());
 
         while self.next_char.is_some() && self.next_char.unwrap().is_digit(10) {
             self.advance();
             string.push(self.current_char.unwrap());
         }
         // NOTE: We are now on the last recognized digit.
-
-        let is_valid_terminator =
-            |c: char| -> bool { c.is_ascii_whitespace() || c == ',' || c == ')' || c == ';' };
 
         match self.next_char {
             Some(c) => {
