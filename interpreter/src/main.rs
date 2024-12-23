@@ -12,8 +12,8 @@ use std::env;
 use std::error::Error;
 use std::fs::File;
 
-use parser::scanner::Scanner;
-use parser::FileUtf8Reader;
+use crate::parser::scanner::Scanner;
+use crate::parser::FileUtf8Reader;
 
 fn read_file(file: File) -> Result<(), Box<dyn Error>> {
     println!("Reading file one char at a time:");
