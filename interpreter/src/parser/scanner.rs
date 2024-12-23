@@ -310,7 +310,7 @@ impl Scanner {
 
         // At least one digit must follow the '.'.
         if self.is_at_end() || !self.current_char.unwrap().is_digit(10) {
-            // TODO: Consider eating chars until next whitespace or EOF.
+            // TODO: Consider eating chars until next valid terminator.
             return None;
         }
         string.push(self.current_char.unwrap());
@@ -321,15 +321,15 @@ impl Scanner {
         }
         // NOTE: We are now on the last recognized digit.
 
+        let is_valid_terminator =
+            |c: char| -> bool { c.is_ascii_whitespace() || c == ',' || c == ')' || c == ';' };
+
         match self.next_char {
             Some(c) => {
-                // TODO: This could be a problem, because it's valid for
-                // a comma, parenthesis, etc. to follow a literal. So we
-                // will keep this in mind and update after testing.
-                if c.is_ascii_whitespace() {
+                if is_valid_terminator(c) {
                     Some(string)
                 } else {
-                    // TODO: Consider eating chars until next whitespace or EOF.
+                    // TODO: Consider eating chars until next valid terminator.
                     None
                 }
             }
