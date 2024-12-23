@@ -6,4 +6,6 @@
 var a = "Hello, " + "World!"
 3.14156
 
+34
 42..0
+"This string literal is unterminated...
