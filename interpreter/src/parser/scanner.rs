@@ -1,7 +1,6 @@
-/// First we will implement a version of the lexer
-/// from Robert Nystrom's *Crafting An Interpreter*.
-/// Then we'll modify that to suit our own language,
-/// which is a work in progress.
+/// First we will implement a version of the lexer from Robert
+/// Nystrom's *Crafting An Interpreter*. Then we'll modify that
+/// to suit our own language, which is a work in progress.
 ///
 /// Created by sean on 12/22/2024.
 ///
@@ -27,9 +26,10 @@ pub enum Token {
 }
 
 pub struct Scanner {
-    reader: FileUtf8Reader,
     pub tokens: Vec<Token>,
-    //
+
+    reader: FileUtf8Reader,
+
     current_char: Option<char>,
     next_char: Option<char>,
     third_char: Option<char>,
@@ -76,8 +76,13 @@ impl Scanner {
                 ';' => self.add_token(Token::Semicolon),
                 '*' => self.add_token(Token::Star),
 
+                // We just ignore whitespace.
+                ' ' | '\t' => {}
+                // Later we may want to track line numbers.
+                '\n' => {}
+
                 _ => {
-                    // TODO: Handle unrecognized token error.
+                    // TODO: Handle unrecognized tokens.
                 }
             },
         }
@@ -85,9 +90,8 @@ impl Scanner {
         self.advance();
     }
 
-    /// This fn exists to avoid duplicating the push
-    /// call each time. And it will be useful if we
-    /// start doing more than just pushing into tokens.
+    /// This fn exists to avoid duplicating the push call for each token,
+    /// And it will be useful if we start recording additional information.
     fn add_token(&mut self, token: Token) {
         self.tokens.push(token);
     }

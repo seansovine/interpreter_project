@@ -23,12 +23,18 @@ any work we do on this.
 
 ## Progress
 
-So far we have implemented a basic version of the scanner, supporting
-single-character tokens, using the `FileUtf8Reader` described below. 
-We will start by implementing a Rust version of his parser from the book.
-But then we will make our own language with some of its own bells and 
-whistles, and for that we will modify the parser, including the scanner 
-part.
+As mentioned above, we are following along with the book *Crafting an Interpreter*,
+and we will start by implementing a Rust version of his parser from the book.
+(Which several others have also done, a Google search reveals.)
+So far we've implemented a basic version of the scanner,
+[here](interpreter/src/parser/scanner.rs),
+supporting single-character tokens, using the `FileUtf8Reader` described below.
+We'll finish that up and move on to the parser soon.
+
+Later we plan to make our own language with some of its own bells and
+whistles, using Bob's Lox as a starting point. For that we will use our
+implementation of his parser and modify it as needed,
+including the scanner.
 
 ## Some code ideas
 
