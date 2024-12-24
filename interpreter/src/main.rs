@@ -13,7 +13,7 @@ use std::error::Error;
 use std::fs::File;
 
 use crate::parser::scanner::Scanner;
-use crate::parser::FileUtf8Reader;
+use crate::parser::{FileUtf8Reader, Parser};
 
 fn read_file(file: File) -> Result<(), Box<dyn Error>> {
     println!("Reading file one char at a time:");
@@ -42,18 +42,22 @@ fn main() -> Result<(), Box<dyn Error>> {
         read_file(file).unwrap();
     }
 
-    if cfg!(feature = "test_scanner") {
-        // Test our scanner.
-        let file = File::open(&args[1]).unwrap();
-        let mut scanner = Scanner::new(file);
+    const PARSER_TEST_FILE: &str = "../programs/basic_parser_test.lox";
 
-        scanner.scan_tokens();
-        let tokens = scanner.tokens;
+    // Test our scanner.
 
-        println!("Recognized tokens are: {:?}", tokens);
-    }
+    let file = File::open(PARSER_TEST_FILE).unwrap();
+    let mut scanner = Scanner::new(file);
 
-    // TODO: Add code to test parser here.
+    scanner.scan_tokens();
+    let tokens = scanner.tokens;
+
+    println!("Recognized tokens are: {:?}", tokens);
+
+    // Use scanned tokens to test our parser.
+
+    let _parser = Parser::new(tokens);
+    // TODO: Add code to pretty print parse results.
 
     Ok(())
 }

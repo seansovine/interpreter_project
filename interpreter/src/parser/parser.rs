@@ -62,11 +62,15 @@ enum BinaryOp {
 pub struct Parser {
     tokens: Vec<Token>,
     cursor: usize,
+    root: Option<Expression>,
 }
 
 impl Parser {
     pub fn new(tokens: Vec<Token>) -> Self {
-        Parser { tokens, cursor: 0 }
+        let mut parser = Parser { tokens, cursor: 0, root: None };
+        parser.root = Some(parser.expression());
+
+        parser
     }
 
     fn expression(&mut self) -> Expression {

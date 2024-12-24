@@ -144,6 +144,7 @@ impl Scanner {
                 '!' => {
                     if self.next_char == Some('=') {
                         self.add_token(Token::BangEqual);
+                        self.advance();
                     } else {
                         self.add_token(Token::Bang);
                     }
@@ -151,6 +152,7 @@ impl Scanner {
                 '=' => {
                     if self.next_char == Some('=') {
                         self.add_token(Token::EqualEqual);
+                        self.advance();
                     } else {
                         self.add_token(Token::Equal);
                     }
@@ -158,6 +160,7 @@ impl Scanner {
                 '<' => {
                     if self.next_char == Some('=') {
                         self.add_token(Token::LessEqual);
+                        self.advance();
                     } else {
                         self.add_token(Token::Less);
                     }
@@ -165,6 +168,7 @@ impl Scanner {
                 '>' => {
                     if self.next_char == Some('=') {
                         self.add_token(Token::GreaterEqual);
+                        self.advance();
                     } else {
                         self.add_token(Token::Greater);
                     }
