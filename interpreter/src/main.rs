@@ -36,20 +36,24 @@ fn main() -> Result<(), Box<dyn Error>> {
     let args: Vec<String> = env::args().collect();
     println!("Command line args are: {}\n", format!("{:?}", args));
 
-    if cfg!(test_filereader) {
+    if cfg!(feature = "test_file_reader") {
         // Test our FileUtf8Reader.
         let file = File::open(&args[1]).unwrap();
         read_file(file).unwrap();
     }
 
-    // Test our scanner.
-    let file = File::open(&args[1]).unwrap();
-    let mut scanner = Scanner::new(file);
+    if cfg!(feature = "test_scanner") {
+        // Test our scanner.
+        let file = File::open(&args[1]).unwrap();
+        let mut scanner = Scanner::new(file);
 
-    scanner.scan_tokens();
-    let tokens = scanner.tokens;
+        scanner.scan_tokens();
+        let tokens = scanner.tokens;
 
-    println!("Recognized tokens are: {:?}", tokens);
+        println!("Recognized tokens are: {:?}", tokens);
+    }
+
+    // TODO: Add code to test parser here.
 
     Ok(())
 }
