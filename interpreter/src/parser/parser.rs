@@ -9,8 +9,8 @@ use crate::parser::scanner::Token;
 // expression → literal | unary | binary | grouping ;
 enum Expression {
     Literal(Literal),
-    UnaryOp(UnaryOp),
-    BinaryOp(BinaryOp),
+    Unary(Unary),
+    Binary(Binary),
     // grouping → "(" expression ")" ;
     Grouping(Box<Expression>),
 }
@@ -64,7 +64,6 @@ pub struct Parser {
     cursor: usize,
 }
 
-/// BIG NOTE: This is Work in Progress!
 impl Parser {
     pub fn new(tokens: Vec<Token>) -> Self {
         Parser { tokens, cursor: 0 }
@@ -76,21 +75,159 @@ impl Parser {
 
     fn equality(&mut self) -> Expression {
         let pred = |token: &Token| match token {
-            Token::EqualEqual => true,
-            Token::BangEqual => true,
+            Token::EqualEqual | Token::BangEqual => true,
             _ => false,
         };
 
-        // TODO: Call comparison here instead.
-        let expr = Expression::Literal(Literal::Nil);
+        let mut expr = self.comparison();
 
         while self.match_token(pred) {
-            let operator = self.previous();
-            // TODO: Call comparison again for RHS.
-            // Update expression to new binary from current.
+            let operator = match self.previous() {
+                Token::EqualEqual => BinaryOp::EqualEqual,
+                Token::BangEqual => BinaryOp::BangEqual,
+                _ => unreachable!(),
+            };
+            let right = self.comparison();
+            expr = Expression::Binary(Binary {
+                left: Box::new(expr),
+                operator,
+                right: Box::new(right),
+            });
         }
 
         expr
+    }
+
+    fn comparison(&mut self) -> Expression {
+        let pred = |token: &Token| match token {
+            Token::Greater | Token::GreaterEqual | Token::Less | Token::LessEqual => true,
+            _ => false,
+        };
+
+        let mut expr = self.term();
+
+        while self.match_token(pred) {
+            let operator = match self.previous() {
+                Token::Greater => BinaryOp::Greater,
+                Token::GreaterEqual => BinaryOp::GreaterEqual,
+                Token::Less => BinaryOp::Less,
+                Token::LessEqual => BinaryOp::LessEqual,
+                _ => unreachable!(),
+            };
+            let right = self.term();
+            expr = Expression::Binary(Binary {
+                left: Box::new(expr),
+                operator,
+                right: Box::new(right),
+            })
+        }
+
+        expr
+    }
+
+    fn term(&mut self) -> Expression {
+        let pred = |token: &Token| match token {
+            Token::Plus | Token::Minus => true,
+            _ => false,
+        };
+
+        let mut expr = self.factor();
+
+        while self.match_token(pred) {
+            let operator = match self.previous() {
+                Token::Plus => BinaryOp::Plus,
+                Token::Minus => BinaryOp::Minus,
+                _ => unreachable!(),
+            };
+            let right = self.factor();
+            expr = Expression::Binary(Binary {
+                left: Box::new(expr),
+                operator,
+                right: Box::new(right),
+            })
+        }
+
+        expr
+    }
+
+    fn factor(&mut self) -> Expression {
+        let pred = |token: &Token| match token {
+            Token::Slash | Token::Star => true,
+            _ => false,
+        };
+
+        let mut expr = self.unary();
+
+        while self.match_token(pred) {
+            let operator = match self.previous() {
+                Token::Slash => BinaryOp::Slash,
+                Token::Star => BinaryOp::Star,
+                _ => unreachable!(),
+            };
+            let right = self.unary();
+            expr = Expression::Binary(Binary {
+                left: Box::new(expr),
+                operator,
+                right: Box::new(right),
+            })
+        }
+
+        expr
+    }
+
+    fn unary(&mut self) -> Expression {
+        let pred = |token: &Token| match token {
+            Token::Bang | Token::Minus => true,
+            _ => false,
+        };
+
+        if self.match_token(pred) {
+            let operator = match self.previous() {
+                Token::Bang => UnaryOp::Bang,
+                Token::Minus => UnaryOp::Minus,
+                _ => unreachable!(),
+            };
+            let right = self.unary();
+            return Expression::Unary(Unary {
+                operator,
+                expr: Box::new(right),
+            });
+        }
+
+        self.primary()
+    }
+
+    fn primary(&mut self) -> Expression {
+        if self.cursor >= self.tokens.len() {
+            panic!("Out of tokens while parsing expression.");
+        }
+
+        // Consume current token.
+        let token = &self.tokens[self.cursor];
+        self.cursor += 1;
+
+        match token {
+            Token::False => Expression::Literal(Literal::False),
+            Token::True => Expression::Literal(Literal::True),
+            Token::Nil => Expression::Literal(Literal::Nil),
+
+            Token::Number(val) => Expression::Literal(Literal::Number(val.to_owned())),
+            Token::String(val) => Expression::Literal(Literal::String(val.to_owned())),
+
+            Token::LeftParen => {
+                let expr = self.expression();
+
+                // Next token should be right paren; consume it.
+                if self.tokens[self.cursor] != Token::RightParen {
+                    panic!("Expected ')'.");
+                }
+                self.cursor += 1;
+
+                Expression::Grouping(Box::new(expr))
+            }
+
+            _ => unreachable!(),
+        }
     }
 
     fn previous(&self) -> &Token {

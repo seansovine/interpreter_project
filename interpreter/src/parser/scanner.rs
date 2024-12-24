@@ -9,7 +9,7 @@ use crate::parser::FileUtf8Reader;
 use std::collections::HashMap;
 use std::fs::File;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Token {
     // Single-char tokens.
     LeftParen,
