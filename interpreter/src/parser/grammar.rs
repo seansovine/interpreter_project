@@ -1,6 +1,10 @@
+/// Implementing Nystrom's Lox expression grammar.
+///
+///
+use crate::parser::Parser;
+
 /// ----------------------------------------------
 /// Grammar definition for Nystrom's Lox language.
-use crate::parser::Parser;
 
 #[derive(Debug)]
 // expression → literal | unary | binary | grouping ;
@@ -110,6 +114,8 @@ impl Expression {
             // directly hold its inner expression, rather than a struct.
             Expression::Grouping(_) => visitor.visit_grouping(self),
 
+            // NOTE: Currently unreachable, but it is useful for
+            // debugging when we add new expression types.
             _ => panic!(
                 "Accept not implemented for this expression variant: {:?}.",
                 self
@@ -158,8 +164,6 @@ impl Visitor<String> for PrettyPrintVisitor {
             BinaryOp::Minus => String::from("-"),
             BinaryOp::Star => String::from("*"),
             BinaryOp::Slash => String::from("/"),
-
-            _ => "".to_string(),
         };
 
         format!(
