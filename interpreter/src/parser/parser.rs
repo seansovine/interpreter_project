@@ -1,60 +1,8 @@
 /// Implementing Nystrom's basic parser.
 ///
 ///
+use crate::parser::grammar::*;
 use crate::parser::scanner::Token;
-
-// -------------------
-// Grammar definition.
-
-// expression → literal | unary | binary | grouping ;
-enum Expression {
-    Literal(Literal),
-    Unary(Unary),
-    Binary(Binary),
-    // grouping → "(" expression ")" ;
-    Grouping(Box<Expression>),
-}
-
-// literal → NUMBER | STRING | "true" | "false" | "nil" ;
-enum Literal {
-    Number(String),
-    String(String),
-    //
-    True,
-    False,
-    Nil,
-}
-
-// unary → ( "-" | "!" ) expression ;
-struct Unary {
-    operator: UnaryOp,
-    expr: Box<Expression>,
-}
-
-enum UnaryOp {
-    Minus,
-    Bang,
-}
-
-// binary → expression operator expression ;
-struct Binary {
-    left: Box<Expression>,
-    operator: BinaryOp,
-    right: Box<Expression>,
-}
-
-enum BinaryOp {
-    EqualEqual,
-    BangEqual,
-    Less,
-    LessEqual,
-    Greater,
-    GreaterEqual,
-    Plus,
-    Minus,
-    Star,
-    Slash,
-}
 
 // ----------------------
 // Parser implementation.
