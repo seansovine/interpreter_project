@@ -27,7 +27,7 @@ fn read_file(file: File) -> Result<(), Box<dyn Error>> {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    println!("Hello, world from the future parser!");
+    println!("Hello, world from the parser!");
 
     let current_dir = env::current_dir().unwrap();
     let current_dir_str = current_dir.into_os_string().into_string().unwrap();
@@ -56,8 +56,10 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Use scanned tokens to test our parser.
 
-    let _parser = Parser::new(tokens);
-    // TODO: Add code to pretty print parse results.
+    let parser = Parser::new(tokens);
+    let repr = parser.pretty_print();
+
+    println!("AST: {repr}");
 
     Ok(())
 }

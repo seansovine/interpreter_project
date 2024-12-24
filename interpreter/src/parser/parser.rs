@@ -10,7 +10,7 @@ use crate::parser::scanner::Token;
 pub struct Parser {
     tokens: Vec<Token>,
     cursor: usize,
-    root: Option<Expression>,
+    pub root: Option<Expression>,
 }
 
 impl Parser {
