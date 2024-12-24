@@ -30,7 +30,7 @@ So far we've implemented a basic version of the scanner,
 [here](interpreter/src/parser/scanner.rs),
 supporting single-character tokens, using the `FileUtf8Reader` described below,
 and we've implemented the first version of the parser, from chapter 6 of
-*Crafting an Interpreter*.
+*Crafting an Interpreter*, [here](interpreter/src/parser/parser.rs).
 
 Later we plan to make our own language with some of its own bells and
 whistles, using Bob's Lox as a starting point. For that we will use our
