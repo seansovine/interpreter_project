@@ -204,7 +204,7 @@ impl Scanner {
                         Some(string) => self.add_token(Token::Number(string)),
 
                         None => {
-                            // TODO: Properly handle unterminated string literal.
+                            // TODO: Properly handle invalid numeric literal.
                             println!(
                                 "Encountered invalid numeric literal on line {}.",
                                 self.current_line
@@ -214,7 +214,7 @@ impl Scanner {
                 }
 
                 // Either a user-defined identifier or a reserved word.
-                c if (c.is_ascii_alphabetic() || c == '_') => {
+                c if Self::is_identifier_char(&c) => {
                     let identifier_string = self.get_identifier();
                     // Check if it's reserved; add appropriate token.
                     if self.keywords_map.contains_key(&identifier_string) {
@@ -238,6 +238,7 @@ impl Scanner {
             },
         }
 
+        // NOTE: Helper function stop on last char of token.
         self.advance();
     }
 
@@ -261,6 +262,7 @@ impl Scanner {
         self.next_char.is_some()
     }
 
+    // Currently used for line comments.
     fn consume_rest_of_line(&mut self) {
         while !self.is_at_end() && self.current_char != Some('\n') {
             self.advance();
@@ -289,14 +291,15 @@ impl Scanner {
         } else {
             None
         }
-
-        // NOTE: We are still on the last quote now.
     }
 
     // NOTE: Currently we're not parsing the number string into an actual
     // numeric value, we're just storing the literal for later parsing.
     // This means we have to handle more validation of the literal format.
     fn get_numeric_literal(&mut self) -> Option<String> {
+        // ------------------------------------
+        // Integral or floating point literals.
+
         let mut string = String::new();
 
         // Get consecutive digits.
@@ -317,6 +320,9 @@ impl Scanner {
         if !self.has_next() || is_valid_terminator(self.next_char.unwrap()) {
             return Some(string);
         }
+
+        // ------------------------------------
+        // Specific to floating point literals.
 
         // To be valid number, next char must be '.'.
         if self.next_char == Some('.') {
@@ -341,7 +347,6 @@ impl Scanner {
             string.push(c);
             self.advance();
         }
-        // NOTE: We are now on the last recognized digit.
 
         match self.next_char {
             Some(c) => {
@@ -365,7 +370,6 @@ impl Scanner {
             self.advance();
             string.push(self.current_char.unwrap());
         }
-        // current_char is now last seen identifier char.
 
         string
     }

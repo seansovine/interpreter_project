@@ -10,6 +10,8 @@ use crate::parser::scanner::Token;
 pub struct Parser {
     tokens: Vec<Token>,
     cursor: usize,
+
+    // Root of AST.
     pub root: Option<Expression>,
 }
 
